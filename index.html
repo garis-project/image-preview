@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Upload Image With Preview</title>
+	<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="container pt-32 mx-auto">
+		<form action="path/to/submit" enctype="multipart/form-data" method="POST" id="form" class="flex flex-col mx-auto w-full">
+			<div class="flex">
+				<div class="flex justify-begin gap-4" id="listImg">
+					<div class="file1 p-4 flex-col bg-gray-100 border ring-2 ring-blue-300 rounded-lg rounded-lg cursor-pointer transform hover:bg-gray-50 hover:shadow-xl">
+						<label for="file1">
+							<img src="" alt=" " id="img-file1" class="bg-gray-100 rounded-lg h-64 w-64 rounded-lg cursor-pointer transform ring-0 hover:shadow-xl">
+						</label>
+						<div class="text-center" id="name-file1"></div>
+						<div class="text-center" id="size-file1"></div>
+						<div class="flex justify-between mt-6">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 transform hover:text-yellow-400 hover:scale-125" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+							</svg>
+							<div class="cursor-pointer rounded-lg" onclick="deleteImg(this)">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto transform hover:text-red-400 hover:scale-125" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+								</svg>
+							</div>
+						</div>
+						<input type="file" id="file1" name="files[]" onchange="preview(this)" class="hidden">
+					</div>
+				</div>
+				<div class="flex my-auto ml-12" id="addBtn">
+					<button type="button" class="shadow-md bg-white-200 ring-2 ring-blue-500 w-12 h-12 rounded-full transform hover:scale-110" onclick="addImg()">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+					</button>
+				</div>
+			</div>
+			<button type="submit" class="shadow-md bg-gray-200 ring-2 ring-blue-500 w-32 h-8 mt-32 rounded-md">Submit</button>
+		</form>
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script type="text/javascript">
+		var counter = 1;
+		var total = 1;
+
+		function preview(fileInput) {
+			let path = $(fileInput).val();
+			let name = path.split(/(\\|\/)/g).pop();
+			if (name.length > 10) {
+				let sub = name.split(".");
+				name = name.substr(0, 10) + '... .' + sub[sub.length - 1];
+			}
+
+			let id = $(fileInput).attr('id');
+
+			let size = fileInput.files[0].size / 1024;
+			size = (Math.round(size * 100) / 100).toFixed(2) + ' KB';
+			var files = fileInput.files;
+			for (var i = 0; i < files.length; i++) {
+				var file = files[i];
+				var imageType = /image.*/;
+				if (!file.type.match(imageType)) {
+					continue;
+				}
+
+				var img = document.getElementById(`img-${id}`);
+				img.file = file;
+				var reader = new FileReader();
+				reader.onload = (function(aImg) {
+					return function(e) {
+						aImg.src = e.target.result;
+					};
+				})(img);
+				reader.readAsDataURL(file);
+			}
+			$(`#size-${id}`).html(size);
+			$(`#name-${id}`).html(name);
+		}
+
+		function addImg() {
+			total = $("#listImg").children().length;
+			if (total >= 4) {
+				$('#addBtn').fadeOut();
+			} else {
+				$('#addBtn').fadeIn();
+			}
+			++counter;
+
+			let newImg = `	<div class="file${counter} p-4 flex-col bg-gray-100 border ring-2 ring-blue-300 rounded-lg rounded-lg cursor-pointer transform hover:bg-gray-50 hover:shadow-xl">
+								<label for="file${counter}">
+									<img src="" alt=" " id="img-file${counter}" class="bg-gray-100 rounded-lg h-64 w-64 rounded-lg cursor-pointer transform ring-0 hover:shadow-xl">
+								</label>
+								<div class="text-center" id="name-file${counter}"></div>
+								<div class="text-center" id="size-file${counter}"></div>
+								<div class="flex justify-between mt-6">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 transform hover:text-yellow-400 hover:scale-125" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+									</svg>
+									<div class="cursor-pointer rounded-lg" onclick="deleteImg(this)">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto transform hover:text-red-400 hover:scale-125" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+										</svg>
+									</div>
+								</div>
+								<input type="file" id="file${counter}" name="files[]" onchange="preview(this)" class="hidden">
+							</div>`;
+			$('#listImg').append(newImg);
+		}
+
+		function deleteImg(ths) {
+			total = $("#listImg").children().length;
+			$(ths).parent().parent().remove();
+			if (total <= 5) {
+				$('#addBtn').fadeIn();
+			}
+		}
+	</script>
+</body>
+
+</html>
